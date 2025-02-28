@@ -12,7 +12,8 @@ If you’re new to this BAPI, you may find [this video](https://www.youtube.com/
 The service:  
 - Accepts JSON payload.  
 - Deserializes it into an ABAP structure.  
-- Dynamically sets X fields based on provided values.  
+- Dynamically sets X fields based on provided values.
+- And finally creates a Sales Order in SAP System if provided JSON payload proper.
 
 ### For example you can see how I test the service via Postman and the result that Sales Order created
 -> under **Authorization** tab I selected **'Basic Auth'** and provided my SAP credentials not to get - 401 Unauthorized error.
