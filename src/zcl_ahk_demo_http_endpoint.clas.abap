@@ -7,9 +7,6 @@ CLASS zcl_ahk_demo_http_endpoint DEFINITION
   PUBLIC SECTION.
     INTERFACES if_http_service_extension.
 
-  PROTECTED SECTION.
-
-  PRIVATE SECTION.
     " Define the structure that matches the JSON payload
     TYPES: BEGIN OF ty_sales_order_create_request,
              order_header_in     TYPE bapisdhd1,
@@ -58,23 +55,26 @@ CLASS zcl_ahk_demo_http_endpoint DEFINITION
              extensionex          TYPE STANDARD TABLE OF bapiparex WITH DEFAULT KEY,
            END OF ty_sales_order_create_internal.
 
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
     DATA lv_json_payload         TYPE string.
     DATA ls_sales_order_payload  TYPE ty_sales_order_create_request.
     DATA ls_sales_order_internal TYPE ty_sales_order_create_internal.
 
-    METHODS create_sales_order
+    METHODS _create_sales_order
       IMPORTING is_sales_order_internal          TYPE ty_sales_order_create_internal
       RETURNING VALUE(rv_created_sales_order_no) TYPE bapivbeln-vbeln.
 
-    METHODS map_request_to_internal
+    METHODS _map_request_to_internal
       IMPORTING is_request         TYPE ty_sales_order_create_request
       RETURNING VALUE(rs_internal) TYPE ty_sales_order_create_internal.
 
-    METHODS fill_x_structure_dynamic
+    METHODS _fill_x_structure_dynamic
       IMPORTING is_source TYPE any
       CHANGING  cs_target TYPE any.
 
-    METHODS fill_x_table_dynamic
+    METHODS _fill_x_table_dynamic
       IMPORTING it_source TYPE ANY TABLE
       CHANGING  ct_target TYPE ANY TABLE.
 ENDCLASS.
@@ -94,14 +94,13 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
             " Retrieve JSON payload from the HTTP body
             lv_json_payload = request->get_text( ).
 
-
             " Deserialize JSON payload into ABAP structure
             /ui2/cl_json=>deserialize( EXPORTING json = lv_json_payload
                                        CHANGING  data = ls_sales_order_payload ).
 
-            ls_sales_order_internal = map_request_to_internal( ls_sales_order_payload ).
+            ls_sales_order_internal = _map_request_to_internal( ls_sales_order_payload ).
 
-            DATA(lv_created_sales_order_no) = create_sales_order( is_sales_order_internal = ls_sales_order_internal ).
+            DATA(lv_created_sales_order_no) = _create_sales_order( is_sales_order_internal = ls_sales_order_internal ).
 
             IF lv_created_sales_order_no IS NOT INITIAL.
               " Set successful response
@@ -126,7 +125,7 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
     ENDCASE.
   ENDMETHOD.
 
-  METHOD create_sales_order.
+  METHOD _create_sales_order.
     DATA ls_order_header_in        TYPE bapisdhd1.
     DATA ls_order_header_inx       TYPE bapisdhd1x.
     DATA lt_return_messages        TYPE STANDARD TABLE OF bapiret2 WITH DEFAULT KEY.
@@ -219,31 +218,31 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD map_request_to_internal.
+  METHOD _map_request_to_internal.
     CLEAR rs_internal.
 
     " Header mapping with dynamic X fill
     rs_internal-order_header_in = is_request-order_header_in.
-    fill_x_structure_dynamic( EXPORTING is_source = rs_internal-order_header_in
-                              CHANGING  cs_target = rs_internal-order_header_inx ).
+    _fill_x_structure_dynamic( EXPORTING is_source = rs_internal-order_header_in
+                               CHANGING  cs_target = rs_internal-order_header_inx ).
 
     " Items mapping
     rs_internal-order_items_in = is_request-order_items_in.
-    fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_items_in
-                          CHANGING  ct_target = rs_internal-order_items_inx ).
+    _fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_items_in
+                           CHANGING  ct_target = rs_internal-order_items_inx ).
 
     " Partners
     rs_internal-order_partners     = is_request-order_partners.
 
     " Schedules
     rs_internal-order_schedules_in = is_request-order_schedules_in.
-    fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_schedules_in
-                          CHANGING  ct_target = rs_internal-order_schedules_inx ).
+    _fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_schedules_in
+                           CHANGING  ct_target = rs_internal-order_schedules_inx ).
 
     " Conditions
     rs_internal-order_conditions_in = is_request-order_conditions_in.
-    fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_conditions_in
-                          CHANGING  ct_target = rs_internal-order_conditions_inx ).
+    _fill_x_table_dynamic( EXPORTING it_source = rs_internal-order_conditions_in
+                           CHANGING  ct_target = rs_internal-order_conditions_inx ).
 
     " Configuration references
     rs_internal-order_cfgs_ref     = is_request-order_cfgs_ref.
@@ -285,7 +284,7 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
     rs_internal-extensionex        = is_request-extensionex.
   ENDMETHOD.
 
-  METHOD fill_x_structure_dynamic.
+  METHOD _fill_x_structure_dynamic.
     " Dynamically fill 'X' fields for structure when its target field has a value
 
     FIELD-SYMBOLS <fs_field>   TYPE any.
@@ -312,7 +311,7 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD fill_x_table_dynamic.
+  METHOD _fill_x_table_dynamic.
     " Dynamically fill 'X' fields for internal tables
 
     DATA lo_table_descr TYPE REF TO cl_abap_tabledescr.
@@ -332,8 +331,8 @@ CLASS zcl_ahk_demo_http_endpoint IMPLEMENTATION.
       ASSIGN lo_data->* TO <ls_target>.
 
       IF <ls_target> IS ASSIGNED.
-        fill_x_structure_dynamic( EXPORTING is_source = <ls_source>
-                                  CHANGING  cs_target = <ls_target> ).
+        _fill_x_structure_dynamic( EXPORTING is_source = <ls_source>
+                                   CHANGING  cs_target = <ls_target> ).
         INSERT <ls_target> INTO TABLE ct_target.
       ENDIF.
     ENDLOOP.
