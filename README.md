@@ -5,7 +5,7 @@ I came across this interesting topic again, thanks to [Software-Heroes](https://
 The original article, [Software-Heroes: BTP - HTTP Service](https://software-heroes.com/en/blog/btp-http-service-endpoint), explains the concept and implementation process very well.
 
 ## Overview
-In our SAP S/4HANA 2023 On-Premise system, I implemented an HTTP service that allows sales order creation via an ABAP-based HTTP endpoint with the BAPI 'BAPI_SALESORDER_CREATEFROMDAT2'.  
+In our Sandbox SAP S/4HANA 2023 On-Premise system, I implemented an HTTP service that allows sales order creation via an ABAP-based HTTP endpoint with the BAPI 'BAPI_SALESORDER_CREATEFROMDAT2'.  
 
 If you’re new to this BAPI, you may find [this video](https://www.youtube.com/watch?v=qUOiOYBQ3Rw&t=1842s&ab_channel=SathishReddy) helpful in understanding how it works and is triggered.  
 
